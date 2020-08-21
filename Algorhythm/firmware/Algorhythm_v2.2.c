@@ -43,7 +43,7 @@
 #pragma config BOREN = SBORDIS, BORV = 2
 #pragma config MCLRE = ON
 #pragma config STVREN = ON
-#pragma config XINST = ON
+#pragma config XINST = OFF
 #pragma config CCP2MX = PORTBE
 #pragma config RETEN = OFF
 
@@ -54,7 +54,7 @@
 *
 ****************************************************************************/
 
-#include <p18f66k22.h>
+#include <pic18f66k22.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -260,18 +260,14 @@ void writeEEint(unsigned int address, unsigned int data);
 ****************************************************************************/
 void DI(void)
 {
-	_asm
-	BCF INTCON,6,0 			// low priority interrupts
-	BCF INTCON,7,0 			// high priority interrups
-	_endasm
+	asm("BCF INTCON,6,0"); 			// low priority interrupts
+	asm("BCF INTCON,7,0"); 			// high priority interrups
 }
 
 void EI(void)
 {
-	_asm
-	BSF INTCON,7,0 			// high priority interrupts
-	BSF INTCON,6,0 			// low priority interrups
-	_endasm
+	asm("BSF INTCON,7,0"); 			// high priority interrupts
+	asm("BSF INTCON,6,0"); 			// low priority interrups
 }
 
 /****************************************************************************
@@ -283,16 +279,12 @@ void EI(void)
 #pragma code highvector = 0x08
 void ISRhighvector(void)
 {
-	_asm
-	GOTO	highISR
-	_endasm
+	asm("GOTO	highISR");
 }
 #pragma code lowvector = 0x18
 void ISRlowvector(void)
 {
-	_asm
-	GOTO	lowISR
-	_endasm
+	asm("GOTO	lowISR");
 }
 #pragma code
 
@@ -1291,16 +1283,12 @@ void pollSwitches(void)
 						//  has changed.  Probably because clock pulse comes along between
 						//  when the pattern is being selected and the display being updated.
 						// therefore, clock pulse is disabled until finished.
-						_asm
-						BCF INTCON,7,0 			// disable high priority interrups
-						_endasm
+						asm("BCF INTCON,7,0"); 			// disable high priority interrups
 
 						displayPattern();
 						displayGrid();			// changing the pattern will affect which steps are enabled
 
-						_asm
-						BSF INTCON,7,0 			// enable high priority interrups
-						_endasm
+						asm("BSF INTCON,7,0"); 			// enable high priority interrups
 
 						break;
 					case VIEWGATE:
