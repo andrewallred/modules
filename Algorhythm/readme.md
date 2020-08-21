@@ -14,3 +14,5 @@ To build firmware version 2.2 download the XC8 compiler (found here: https://www
 ```
 xc8 --chip=18f66k22 Algorhythm_v2.2.c
 ```
+
+Edit: this isn't working! Functions called in ASM instructions do not look like they are being compiled if not called elsewhere.
