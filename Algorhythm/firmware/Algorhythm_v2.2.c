@@ -147,6 +147,7 @@ enum _statusLED{
 
 // step related variables
 unsigned char currentStep;
+unsigned char randomStep;
 unsigned char enabledStep[9];
 unsigned char resetRequest;
 unsigned char linkStopAllRequest;
@@ -173,6 +174,7 @@ volatile unsigned char startMode;
 volatile unsigned char runMode;			// with startMode = 1 and runMode = 0 == armed mode
 unsigned char loopMode;
 unsigned char seqMode;
+unsigned char randomSeqMode;
 unsigned char gateMode;
 unsigned char linkMode;
 unsigned char invertedMode = 0;			// panel inversion, not implemented at this time
@@ -387,6 +389,7 @@ void initialize(void)
 	previousPortD = 0x00;
 
 	currentStep = 0;		// in armed mode, current step is zero
+    randomStep = 0;
 	stepCounter = 1;
 	loopCounter = 1;
 	initPortBInterrupts();
@@ -1460,11 +1463,11 @@ void advanceStep(void)
 
 	// stepCounter and loopCounter are advanced on Clock Low
 
-	if(seqMode)
+    if(seqMode)
 	{
 		currentStep = stepCounter;
 	}
-	else	// random mode
+	else	// random mode	
 	{
 		// changing the seed doesn't change the pattern of 3 bits, it still
 		// repeats every 64 rands.  All changing the seed does is change where in
@@ -1475,11 +1478,18 @@ void advanceStep(void)
 		c = random;
 		c ^= TMR0L;							// XOR with timer 0
 		c &= 0x07;							// clear all but 3 bits, 0-7
-		c = c % patternSetting;				// modulo
-		currentStep = c + 1;
-	}
+		c = c % patternSetting;				// modulo    
+		randomStep = c + 1;
+        if (randomSeqMode) {
+            currentStep = stepCounter;
+        }
+        else
+        {
+            currentStep = randomStep;
+        }
+	}    
 
-	if(enabledStep[currentStep])
+    if (enabledStep[currentStep] || (randomSeqMode && !enabledStep[randomStep]))
 	{
 		setPatternOut(TRUE);
 		if(!gateMode)
